@@ -1,0 +1,30 @@
+name: NextBase contribution checks
+on:
+  push:
+    branches: [verify/contributor-checks]
+permissions:
+  contents: read
+jobs:
+  contributor-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: a0115ee20292c775cb568e2899578cfc6a08a79c
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - run: npm install --global pnpm@11.1.2
+      - id: install
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        if: always() && steps.install.outcome == 'success'
+        run: pnpm lint
+      - name: Typecheck
+        if: always() && steps.install.outcome == 'success'
+        run: pnpm typecheck
+      - name: Unit tests
+        if: always() && steps.install.outcome == 'success'
+        run: pnpm test
